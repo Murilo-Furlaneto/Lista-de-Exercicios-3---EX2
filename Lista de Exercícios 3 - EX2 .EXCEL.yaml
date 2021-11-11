@@ -1,0 +1,19 @@
+name: 'Lista de Exercícios 3 - EX2 '
+description: ''
+host: EXCEL
+api_set: {}
+script:
+  content: "const button = document.getElementById(\"button\") as HTMLButtonElement;\r\n\r\nbutton.addEventListener(\"click\", () => {\r\n  Excel.run(async (context) => {\r\n    // Obtém a planilha ativa.\r\n    const sheet = context.workbook.worksheets.getActiveWorksheet();\r\n\r\n    // Renomeia a planilha ativa.\r\n    sheet.name = \"Notas dos Alunos\";\r\n\r\n    // Limpa qualquer formatação pré-existente na planilha.\r\n    sheet.getUsedRange().clear(\"Formats\");\r\n\r\n    // Tenta obter uma tabela já existente na planilha.\r\n    let table = sheet.tables.getItemOrNullObject(\"NotasAlunos\");\r\n    table.load(\"isNullObject\");\r\n    await context.sync();\r\n\r\n    // Se não houver tabela...\r\n    if (table.isNullObject) {\r\n      // Cria uma nova tabela Excel no intervalo de células usadas.\r\n      table = sheet.tables.add(sheet.getUsedRange(), true);\r\n    }\r\n\r\n    // Nomeia a tabela e define o estilo desejado.\r\n    table.name = \"NotasAlunos\";\r\n    table.style = \"TableStyleMedium18\";\r\n\r\n    // Ordena alfabeticamente a primeira coluna da tabela.\r\n    table.sort.apply([{ key: 0, ascending: true }]);\r\n\r\n    // Obtém as células do corpo da tabela.\r\n    const tableBody = table.getDataBodyRange();\r\n\r\n    // Formata as três últimas colunas da tabela com formato numérico.\r\n    tableBody.getColumnsAfter(-3).numberFormat = [[\"0.0\"]];\r\n\r\n    // Obtém a última coluna da tabela e carrega a quantidade de linhas.\r\n    const column = tableBody.getLastColumn();\r\n    column.load(\"rowCount\");\r\n    await context.sync();\r\n\r\n    // Faz uma repetição para passar por cada linha da coluna.\r\n    for (let i = 0; i < column.rowCount; i++) {\r\n      // Obtém a linha da repetição atual e carrega seus valores.\r\n      const row = column.getRow(i);\r\n      row.load(\"values\");\r\n      await context.sync();\r\n\r\n      // Se o valor desta linha é menor que zero...\r\n      if (row.values[0][0] < 6) {\r\n        // Colore em vermelho.\r\n        row.format.font.color = \"Red\";\r\n      }\r\n    }\r\n  });\r\n});\r\n"
+  language: typescript
+template:
+  content: <button id="button">Formatar Planilha</button>
+  language: html
+style:
+  content: ''
+  language: css
+libraries: |-
+  https://appsforoffice.microsoft.com/lib/1/hosted/office.js
+  @types/office-js
+
+  core-js@2.4.1/client/core.min.js
+  @types/core-js
